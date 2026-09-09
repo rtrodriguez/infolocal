@@ -9,6 +9,8 @@ from supabase import create_client
 from pydantic import BaseModel
 from typing import Optional
 import os
+import urllib.request
+import json as json_lib
 
 # ── Config ──────────────────────────────────────────────────
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://iktkiskmqshsxnwqhvvp.supabase.co")
@@ -232,9 +234,6 @@ def stats(municipio_id: str):
 # ════════════════════════════════════════════════════════════
 #  ASISTENTE IA
 # ════════════════════════════════════════════════════════════
-import urllib.request
-import json as json_lib
-
 class PreguntaIA(BaseModel):
     pregunta: str
     municipio_id: str
