@@ -374,6 +374,9 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 // ── CONFIG ──────────────────────────────────────────────────
 const API = 'https://infolocal-0y68.onrender.com';
 const MUNICIPIO_ID = '1400c5a4-452f-4764-9ec2-6d10898ad285';
+let feedOffset = 0;
+let feedCargando = false;
+let feedAgotado = false;
 
 // ── NAVEGACIÓN ───────────────────────────────────────────────
 let obCurrent = 1;
@@ -480,29 +483,59 @@ function skeletonHTML() {
 }
 
 // ── CARGAR DATOS REALES DE LA API ────────────────────────────
-async function cargarFeed() {
+async function cargarFeed(append = false) {
+  if (feedCargando || feedAgotado) return;
+  feedCargando = true;
+  const container = document.getElementById('feed-container');
+
+  if (!append) {
+    feedOffset = 0;
+    feedAgotado = false;
+    container.innerHTML = '<div class="sk-card"><div class="skeleton sk-line sk-title" style="margin-bottom:8px"></div><div class="skeleton sk-line sk-body" style="margin-bottom:8px"></div><div class="skeleton sk-line sk-body2"></div></div>'.repeat(3);
+  } else {
+    const loader = document.createElement('div');
+    loader.id = 'feed-loader';
+    loader.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--text-secondary);font-size:0.82rem">Cargando más…</div>';
+    container.appendChild(loader);
+  }
+
   try {
-    const r = await fetch(`${API}/feed/${MUNICIPIO_ID}?limite=20`);
+    const r = await fetch(`${API}/feed/${MUNICIPIO_ID}?limite=20&offset=${feedOffset}`);
     const data = await r.json();
     const items = data.items || [];
-    const container = document.getElementById('feed-container');
 
-    if (!items.length) {
-      container.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>No hay contenidos disponibles aún</div>';
-      return;
+    document.getElementById('feed-loader')?.remove();
+
+    if (!append) {
+      if (!items.length) {
+        container.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>No hay contenidos disponibles aún</div>';
+        feedCargando = false;
+        return;
+      }
+      // Actualizar saludo
+      const hora = new Date().getHours();
+      const saludo = hora < 12 ? 'Buenos días' : hora < 20 ? 'Buenas tardes' : 'Buenas noches';
+      document.querySelector('.greeting-card h2').textContent = `${saludo} 👋`;
+      document.querySelector('.greeting-card p').textContent = `Últimas novedades de Algete.`;
+      container.innerHTML = items.map(cardHTML).join('');
+    } else {
+      if (!items.length) {
+        feedAgotado = true;
+        container.insertAdjacentHTML('beforeend', '<div class="empty" style="padding:.75rem">Ya has visto todo 👍</div>');
+        feedCargando = false;
+        return;
+      }
+      container.insertAdjacentHTML('beforeend', items.map(cardHTML).join(''));
     }
 
-    // Actualizar saludo
-    const hora = new Date().getHours();
-    const saludo = hora < 12 ? 'Buenos días' : hora < 20 ? 'Buenas tardes' : 'Buenas noches';
-    document.querySelector('.greeting-card h2').textContent = `${saludo} 👋`;
-    document.querySelector('.greeting-card p').textContent = `Hay ${items.length} novedades en Algete para ti hoy.`;
+    feedOffset += items.length;
+    if (items.length < 20) feedAgotado = true;
 
-    container.innerHTML = items.map(cardHTML).join('');
   } catch(e) {
-    document.getElementById('feed-container').innerHTML =
-      '<div class="empty"><div class="empty-icon">⚠️</div>Error al cargar contenidos. Inténtalo de nuevo.</div>';
+    document.getElementById('feed-loader')?.remove();
+    if (!append) container.innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div>Error al cargar. Inténtalo de nuevo.</div>';
   }
+  feedCargando = false;
 }
 
 async function cargarAlertas() {
@@ -611,6 +644,14 @@ function initApp() {
   // Cargar todo en paralelo
   cargarAlertas();
   cargarFeed();
+
+  // Scroll infinito
+  window.addEventListener('scroll', () => {
+    const tab = document.getElementById('tab-portada');
+    if (!tab.classList.contains('active')) return;
+    const distanciaFinal = document.documentElement.scrollHeight - window.scrollY - window.innerHeight;
+    if (distanciaFinal < 300) cargarFeed(true);
+  });
   cargarAgenda();
   cargarAyudas();
   cargarNoticias();
