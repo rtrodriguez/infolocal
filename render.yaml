@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: infolocal-api
+    runtime: python
+    rootDir: api
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: SUPABASE_URL
+        value: https://iktkiskmqshsxnwqhvvp.supabase.co
+      - key: SUPABASE_KEY
+        sync: false
+      - key: GEMINI_KEY
+        sync: false
+
+  - type: cron
+    name: infolocal-scraper
+    runtime: python
+    rootDir: api
+    buildCommand: pip install -r requirements.txt
+    schedule: "0 7 * * *"
+    startCommand: python ../scripts/scraper_run.py
+    envVars:
+      - key: SUPABASE_URL
+        value: https://iktkiskmqshsxnwqhvvp.supabase.co
+      - key: SUPABASE_KEY
+        sync: false

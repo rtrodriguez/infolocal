@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>InfoLocal — Algete</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --blue: #0A66C2;
+  --blue-hover: #004182;
+  --blue-light: #EBF3FB;
+  --bg: #F3F2EF;
+  --white: #FFFFFF;
+  --text: #191919;
+  --text-secondary: #666666;
+  --border: #E0DFDC;
+  --red: #CC1016;
+  --red-light: #FDECEA;
+  --green: #057642;
+  --green-light: #E7F3EC;
+  --gold: #B06000;
+  --gold-light: #FDF3E3;
+  --purple: #6B38C4;
+  --purple-light: #F0EAFB;
+}
+html { font-size: 15px; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+
+/* SCREENS */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: block; }
+
+/* ══ LOGIN ══ */
+#screen-login {
+  background: var(--bg);
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 2rem 1.25rem; min-height: 100vh;
+}
+#screen-login.active { display: flex; }
+
+.login-logo {
+  font-size: 1.6rem; font-weight: 700; color: var(--blue);
+  letter-spacing: -0.5px; margin-bottom: 0.25rem;
+}
+.login-sub { font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 2rem; text-align: center; }
+.login-card {
+  background: var(--white); border-radius: 8px;
+  padding: 1.75rem 1.5rem; width: 100%; max-width: 380px;
+  box-shadow: 0 0 0 1px var(--border), 0 2px 8px rgba(0,0,0,0.06);
+}
+.login-card h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1.25rem; }
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-size: 0.78rem; font-weight: 600; margin-bottom: 0.35rem; color: var(--text); }
+.field input {
+  width: 100%; padding: 0.7rem 0.85rem;
+  border: 1px solid var(--border); border-radius: 4px;
+  font-family: inherit; font-size: 0.9rem; color: var(--text); outline: none;
+  transition: border-color 0.15s;
+}
+.field input:focus { border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue-light); }
+.btn-blue {
+  width: 100%; padding: 0.75rem;
+  background: var(--blue); color: white; border: none;
+  border-radius: 24px; font-family: inherit;
+  font-size: 0.9rem; font-weight: 600; cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-blue:hover { background: var(--blue-hover); }
+.btn-outline {
+  width: 100%; padding: 0.75rem;
+  background: transparent; color: var(--blue);
+  border: 1.5px solid var(--blue); border-radius: 24px;
+  font-family: inherit; font-size: 0.9rem; font-weight: 600;
+  cursor: pointer; margin-top: 0.75rem;
+  transition: all 0.15s;
+}
+.btn-outline:hover { background: var(--blue-light); }
+.divider {
+  display: flex; align-items: center; gap: 0.75rem;
+  margin: 1.25rem 0; font-size: 0.78rem; color: var(--text-secondary);
+}
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ══ ONBOARDING ══ */
+#screen-onboarding { background: var(--bg); display: none; flex-direction: column; }
+#screen-onboarding.active { display: flex; }
+.ob-topbar {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 1rem 1.25rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.ob-topbar-logo { font-size: 1.2rem; font-weight: 700; color: var(--blue); }
+.ob-steps { display: flex; gap: 6px; }
+.ob-step-dot { width: 28px; height: 4px; border-radius: 2px; background: var(--border); transition: background 0.3s; }
+.ob-step-dot.done { background: var(--blue); }
+.ob-body { flex: 1; padding: 2rem 1.25rem; max-width: 480px; margin: 0 auto; width: 100%; }
+.ob-pane { display: none; }
+.ob-pane.active { display: block; }
+.ob-pane h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.4rem; }
+.ob-pane .hint { font-size: 0.83rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.5; }
+.big-input {
+  width: 100%; padding: 0.8rem 1rem;
+  border: 1.5px solid var(--border); border-radius: 4px;
+  font-family: inherit; font-size: 1rem; font-weight: 500;
+  color: var(--text); outline: none; margin-bottom: 1.5rem;
+  transition: border-color 0.15s;
+}
+.big-input:focus { border-color: var(--blue); }
+.interest-list { margin-bottom: 1.5rem; }
+.int-row {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.85rem 0; border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.int-row:first-child { border-top: 1px solid var(--border); }
+.int-icon { font-size: 1.1rem; width: 28px; text-align: center; flex-shrink: 0; }
+.int-name { font-size: 0.9rem; font-weight: 500; flex: 1; }
+.int-check {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; color: transparent;
+  transition: all 0.15s; flex-shrink: 0;
+}
+.int-row.sel .int-check { background: var(--blue); border-color: var(--blue); color: white; }
+
+/* ══ APP ══ */
+#screen-app { background: var(--bg); padding-bottom: 65px; }
+
+/* TOPBAR */
+.topbar {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 0 1rem; height: 52px;
+  display: flex; align-items: center; gap: 0.75rem;
+  position: sticky; top: 0; z-index: 100;
+}
+.topbar-logo { font-size: 1.1rem; font-weight: 700; color: var(--blue); flex-shrink: 0; }
+.search-bar {
+  flex: 1; display: flex; align-items: center; gap: 0.5rem;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 4px; padding: 0.45rem 0.75rem; cursor: pointer;
+}
+.search-bar input {
+  border: none; background: transparent; outline: none;
+  font-family: inherit; font-size: 0.82rem; color: var(--text-secondary);
+  flex: 1; cursor: pointer;
+}
+.search-icon { font-size: 0.85rem; color: var(--text-secondary); flex-shrink: 0; }
+.topbar-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--blue-light); border: 1.5px solid var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 700; color: var(--blue);
+  cursor: pointer; flex-shrink: 0;
+}
+
+/* LOCATION BAR */
+.location-bar {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 0.55rem 1rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.loc-left { display: flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; color: var(--text-secondary); }
+.loc-left strong { color: var(--text); font-weight: 600; }
+.weather { font-size: 0.75rem; color: var(--text-secondary); }
+
+/* FEED NAV */
+.feed-nav {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  display: flex; overflow-x: auto; scrollbar-width: none;
+}
+.feed-nav::-webkit-scrollbar { display: none; }
+.fnav {
+  padding: 0.65rem 0.9rem; font-size: 0.78rem; font-weight: 600;
+  color: var(--text-secondary); white-space: nowrap; cursor: pointer;
+  border-bottom: 2px solid transparent; background: none;
+  border-top: none; border-left: none; border-right: none;
+  font-family: inherit; flex-shrink: 0; transition: all 0.15s;
+}
+.fnav.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+/* CONTENT WRAPPER */
+.feed { padding: 0.75rem 1rem; max-width: 680px; margin: 0 auto; }
+
+/* CARDS */
+.card {
+  background: var(--white); border-radius: 8px;
+  border: 1px solid var(--border); margin-bottom: 0.75rem;
+  overflow: hidden;
+}
+.card-body { padding: 1rem; }
+.card-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+.card-source {
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.source-icon {
+  width: 36px; height: 36px; border-radius: 4px;
+  background: var(--blue-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+.source-info { }
+.source-name { font-size: 0.78rem; font-weight: 600; line-height: 1.3; }
+.source-time { font-size: 0.72rem; color: var(--text-secondary); }
+.pill {
+  font-size: 0.68rem; font-weight: 600; padding: 2px 8px;
+  border-radius: 12px; white-space: nowrap; flex-shrink: 0;
+}
+.pill-red { background: var(--red-light); color: var(--red); }
+.pill-blue { background: var(--blue-light); color: var(--blue); }
+.pill-green { background: var(--green-light); color: var(--green); }
+.pill-gold { background: var(--gold-light); color: var(--gold); }
+.pill-purple { background: var(--purple-light); color: var(--purple); }
+.pill-gray { background: var(--bg); color: var(--text-secondary); }
+
+.card-title { font-size: 0.95rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.35rem; }
+.card-desc { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 0.6rem; }
+.card-footer {
+  display: flex; align-items: center; gap: 1rem;
+  font-size: 0.72rem; color: var(--text-secondary);
+  border-top: 1px solid var(--border); padding-top: 0.6rem; margin-top: 0.6rem;
+}
+.card-footer span { display: flex; align-items: center; gap: 3px; }
+.card-cta {
+  margin-left: auto; color: var(--blue); font-weight: 600; font-size: 0.72rem; cursor: pointer;
+}
+
+/* ALERTA */
+.alert-card {
+  background: var(--white); border-radius: 8px;
+  border: 1px solid var(--border); border-left: 4px solid var(--red);
+  padding: 0.9rem 1rem; margin-bottom: 0.75rem;
+  display: flex; gap: 0.75rem; align-items: flex-start;
+}
+.alert-icon { font-size: 1.1rem; flex-shrink: 0; }
+.alert-title { font-size: 0.88rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--red); }
+.alert-desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.45; }
+
+/* SALUDO */
+.greeting-card {
+  background: var(--blue); border-radius: 8px;
+  padding: 1rem 1.1rem; margin-bottom: 0.75rem;
+  color: white;
+}
+.greeting-card h2 { font-size: 1rem; font-weight: 700; margin-bottom: 0.2rem; }
+.greeting-card p { font-size: 0.8rem; opacity: 0.85; line-height: 1.45; }
+.greeting-meta { display: flex; gap: 0.75rem; margin-top: 0.6rem; font-size: 0.72rem; opacity: 0.7; }
+
+/* SCROLL HORIZONTAL — AGENDA */
+.scroll-section { margin-bottom: 0.75rem; }
+.scroll-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+.scroll-section-header h3 { font-size: 0.85rem; font-weight: 700; }
+.scroll-section-header a { font-size: 0.75rem; color: var(--blue); font-weight: 600; cursor: pointer; }
+.h-scroll { display: flex; gap: 0.65rem; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; }
+.h-scroll::-webkit-scrollbar { display: none; }
+.event-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 8px; padding: 0.85rem; min-width: 155px;
+  flex-shrink: 0; cursor: pointer;
+}
+.event-date {
+  font-size: 0.68rem; font-weight: 700; color: var(--blue);
+  text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.35rem;
+}
+.event-title { font-size: 0.82rem; font-weight: 600; line-height: 1.3; margin-bottom: 0.25rem; }
+.event-place { font-size: 0.72rem; color: var(--text-secondary); }
+
+/* BUSCADOR IA */
+.ai-bar {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 8px; padding: 0.85rem 1rem;
+  display: flex; align-items: center; gap: 0.6rem;
+  margin-bottom: 0.75rem; cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.ai-bar:hover { border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue-light); }
+.ai-bar-text { flex: 1; font-size: 0.85rem; color: var(--text-secondary); }
+.ai-badge {
+  font-size: 0.65rem; font-weight: 700;
+  background: var(--blue); color: white;
+  padding: 2px 7px; border-radius: 10px;
+}
+
+/* SECTION DIVIDER */
+.sec-divider {
+  font-size: 0.72rem; font-weight: 700; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 0.5rem 0 0.4rem; margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sec-divider a { color: var(--blue); cursor: pointer; font-weight: 600; }
+
+/* BOTTOM NAV */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--white); border-top: 1px solid var(--border);
+  display: flex; z-index: 200;
+}
+.bnav {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  padding: 0.45rem 0.25rem; cursor: pointer; gap: 2px;
+  border: none; background: none; font-family: inherit;
+  transition: color 0.15s;
+}
+.bnav-icon { font-size: 1.15rem; }
+.bnav-label { font-size: 0.58rem; font-weight: 600; color: var(--text-secondary); }
+.bnav.active .bnav-label { color: var(--blue); }
+.bnav.active .bnav-icon { filter: none; }
+.bnav-dot {
+  width: 3px; height: 3px; border-radius: 50%;
+  background: var(--blue); display: none; margin: 0 auto;
+}
+.bnav.active .bnav-dot { display: block; }
+
+/* TABS */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* PERFIL */
+.profile-header {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 8px; padding: 1.25rem 1rem; margin-bottom: 0.75rem;
+  text-align: center;
+}
+.profile-avatar-lg {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--blue-light); border: 3px solid var(--white);
+  box-shadow: 0 0 0 2px var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; font-weight: 700; color: var(--blue);
+  margin: 0 auto 0.75rem;
+}
+.profile-header h2 { font-size: 1rem; font-weight: 700; margin-bottom: 0.15rem; }
+.profile-header p { font-size: 0.78rem; color: var(--text-secondary); }
+
+.settings-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 8px; margin-bottom: 0.75rem; overflow: hidden;
+}
+.settings-title {
+  padding: 0.75rem 1rem 0.5rem;
+  font-size: 0.72rem; font-weight: 700; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--border);
+}
+.settings-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+.settings-row:last-child { border-bottom: none; }
+.toggle {
+  width: 38px; height: 22px; border-radius: 11px;
+  background: var(--blue); position: relative; cursor: pointer;
+  flex-shrink: 0; transition: background 0.2s;
+}
+.toggle::after {
+  content: ''; position: absolute;
+  top: 3px; right: 3px; width: 16px; height: 16px;
+  background: white; border-radius: 50%; transition: right 0.2s;
+}
+.toggle.off { background: var(--border); }
+.toggle.off::after { right: auto; left: 3px; }
+
+/* MODAL */
+.modal-bg {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5); z-index: 300;
+  align-items: flex-end;
+}
+.modal-bg.open { display: flex; }
+.modal-sheet {
+  background: var(--white); width: 100%; max-height: 82vh;
+  overflow-y: auto; border-radius: 12px 12px 0 0;
+  padding: 1.25rem 1rem;
+}
+.modal-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: var(--border); margin: 0 auto 1.1rem;
+}
+.modal-title {
+  font-size: 1rem; font-weight: 700; margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.ai-response-box {
+  background: var(--blue-light); border-radius: 8px;
+  padding: 0.9rem 1rem; margin-bottom: 1rem;
+  font-size: 0.85rem; line-height: 1.6; color: var(--text);
+}
+.ai-from {
+  font-size: 0.68rem; font-weight: 700; color: var(--blue);
+  margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.quick-qs { margin-bottom: 1rem; }
+.quick-qs-label {
+  font-size: 0.72rem; font-weight: 700; color: var(--text-secondary);
+  margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.qq-btn {
+  display: block; width: 100%; text-align: left;
+  padding: 0.6rem 0; border: none; border-bottom: 1px solid var(--border);
+  background: none; font-family: inherit; font-size: 0.85rem;
+  color: var(--text); cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.qq-btn:hover { color: var(--blue); }
+.qq-btn::after { content: '›'; color: var(--text-secondary); }
+.modal-input {
+  display: flex; border: 1.5px solid var(--border); border-radius: 24px; overflow: hidden;
+  transition: border-color 0.15s;
+}
+.modal-input:focus-within { border-color: var(--blue); }
+.modal-input input {
+  flex: 1; border: none; outline: none; padding: 0.7rem 1rem;
+  font-family: inherit; font-size: 0.85rem; background: transparent;
+}
+.modal-input button {
+  padding: 0.7rem 1.1rem; background: var(--blue); color: white;
+  border: none; font-family: inherit; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; border-radius: 0 24px 24px 0;
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div class="screen active" id="screen-login">
+  <div class="login-logo">InfoLocal</div>
+  <div class="login-sub">La actualidad de tu municipio, en un vistazo</div>
+  <div class="login-card">
+    <h2>Accede a tu cuenta</h2>
+    <div class="field">
+      <label>Correo electrónico</label>
+      <input type="email" value="ruben@algete.es">
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" value="••••••••">
+    </div>
+    <button class="btn-blue" onclick="goTo('onboarding')">Entrar</button>
+    <div class="divider">o</div>
+    <button class="btn-outline" onclick="goTo('onboarding')">Crear cuenta gratis</button>
+  </div>
+</div>
+
+<!-- ══ ONBOARDING ══ -->
+<div class="screen" id="screen-onboarding">
+  <div class="ob-topbar">
+    <div class="ob-topbar-logo">InfoLocal</div>
+    <div class="ob-steps">
+      <div class="ob-step-dot done" id="d1"></div>
+      <div class="ob-step-dot" id="d2"></div>
+      <div class="ob-step-dot" id="d3"></div>
+    </div>
+  </div>
+  <div class="ob-body">
+
+    <div class="ob-pane active" id="op1">
+      <h2>¿Dónde vives?</h2>
+      <p class="hint">Te mostraremos solo lo que ocurre en tu municipio. Puedes cambiarlo cuando quieras.</p>
+      <input class="big-input" type="text" value="Algete, Madrid">
+      <button class="btn-blue" onclick="obGo(2)">Confirmar</button>
+    </div>
+
+    <div class="ob-pane" id="op2">
+      <h2>¿Qué te interesa?</h2>
+      <p class="hint">Elige los temas que quieres ver en tu portada. Puedes ajustarlo después.</p>
+      <div class="interest-list">
+        <div class="int-row sel" onclick="this.classList.toggle('sel')"><span class="int-icon">🎭</span><span class="int-name">Cultura y ocio</span><div class="int-check">✓</div></div>
+        <div class="int-row sel" onclick="this.classList.toggle('sel')"><span class="int-icon">👨‍👩‍👧</span><span class="int-name">Familia y educación</span><div class="int-check">✓</div></div>
+        <div class="int-row" onclick="this.classList.toggle('sel')"><span class="int-icon">💰</span><span class="int-name">Ayudas y subvenciones</span><div class="int-check">✓</div></div>
+        <div class="int-row" onclick="this.classList.toggle('sel')"><span class="int-icon">🏋️</span><span class="int-name">Deporte</span><div class="int-check">✓</div></div>
+        <div class="int-row sel" onclick="this.classList.toggle('sel')"><span class="int-icon">📰</span><span class="int-name">Noticias locales</span><div class="int-check">✓</div></div>
+        <div class="int-row" onclick="this.classList.toggle('sel')"><span class="int-icon">🏢</span><span class="int-name">Trámites municipales</span><div class="int-check">✓</div></div>
+        <div class="int-row" onclick="this.classList.toggle('sel')"><span class="int-icon">🌳</span><span class="int-name">Medio ambiente</span><div class="int-check">✓</div></div>
+      </div>
+      <button class="btn-blue" onclick="obGo(3)">Continuar</button>
+    </div>
+
+    <div class="ob-pane" id="op3">
+      <h2>Todo listo 🎉</h2>
+      <p class="hint">Hemos preparado tu portada de Algete. Recibirás un resumen cada mañana con lo más importante.</p>
+      <br><br>
+      <button class="btn-blue" onclick="goTo('app')">Ver mi portada</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div class="screen" id="screen-app">
+
+  <div class="topbar">
+    <div class="topbar-logo">InfoLocal</div>
+    <div class="search-bar" onclick="openModal()">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Pregunta algo sobre Algete…" readonly>
+    </div>
+    <div class="topbar-avatar" onclick="showTab('perfil')">RG</div>
+  </div>
+
+  <div class="location-bar">
+    <div class="loc-left">📍 <strong>Algete</strong> · Mié 9 sep 2026</div>
+    <div class="weather">🌤️ 22 °C</div>
+  </div>
+
+  <div class="feed-nav">
+    <button class="fnav active" onclick="switchTab(this,'portada')">Para ti</button>
+    <button class="fnav" onclick="switchTab(this,'agenda')">Agenda</button>
+    <button class="fnav" onclick="switchTab(this,'ayudas')">Ayudas</button>
+    <button class="fnav" onclick="switchTab(this,'tramites')">Trámites</button>
+    <button class="fnav" onclick="switchTab(this,'noticias')">Noticias</button>
+  </div>
+
+  <!-- ── PORTADA ── -->
+  <div class="tab-panel active" id="tab-portada">
+    <div class="feed">
+
+      <div class="greeting-card">
+        <h2>Buenos días, Rubén 👋</h2>
+        <p>Hay 4 novedades en Algete que encajan con tus intereses.</p>
+        <div class="greeting-meta"><span>📅 Miércoles</span><span>🌤️ 22°C</span><span>📍 Algete</span></div>
+      </div>
+
+      <div class="alert-card">
+        <span class="alert-icon">⚠️</span>
+        <div>
+          <div class="alert-title">Corte de agua — Urb. Santo Domingo</div>
+          <div class="alert-desc">Hoy de 10:00 a 14:00 h por mantenimiento. Afecta calles Pino y Encina.</div>
+        </div>
+      </div>
+
+      <div class="ai-bar" onclick="openModal()">
+        <span>💬</span>
+        <span class="ai-bar-text">¿Qué quieres saber sobre Algete hoy?</span>
+        <span class="ai-badge">IA</span>
+      </div>
+
+      <div class="sec-divider">Lo más relevante <a>Ver todo</a></div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="card-header">
+            <div class="card-source">
+              <div class="source-icon">🏛️</div>
+              <div class="source-info">
+                <div class="source-name">Ayuntamiento de Algete</div>
+                <div class="source-time">Hace 2 horas</div>
+              </div>
+            </div>
+            <span class="pill pill-blue">Municipio</span>
+          </div>
+          <div class="card-title">El Ayuntamiento aprueba la renovación de 6 parques infantiles con 280.000 €</div>
+          <div class="card-desc">Las obras arrancan en octubre y estarán terminadas antes de Navidad. Afecta a las urbanizaciones Santo Domingo, La Dehesa y el casco urbano.</div>
+          <div class="card-footer">
+            <span>📅 Hoy</span>
+            <span>📍 Algete</span>
+            <span class="card-cta">Leer más →</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="scroll-section">
+        <div class="scroll-section-header">
+          <h3>📅 Este fin de semana</h3>
+          <a onclick="switchTab(document.querySelector('.fnav:nth-child(2)'),'agenda')">Ver agenda</a>
+        </div>
+        <div class="h-scroll">
+          <div class="event-card">
+            <div class="event-date">Sáb 11 sep · 20:00</div>
+            <div class="event-title">Concierto Banda Municipal</div>
+            <div class="event-place">📍 Plaza Mayor · Gratis</div>
+          </div>
+          <div class="event-card">
+            <div class="event-date">Sáb 11 sep · 11:00</div>
+            <div class="event-title">Cuentacuentos infantil</div>
+            <div class="event-place">📍 Biblioteca · Gratis</div>
+          </div>
+          <div class="event-card">
+            <div class="event-date">Dom 12 sep · 18:00</div>
+            <div class="event-title">CD Algete vs Torrejón CF</div>
+            <div class="event-place">📍 Campo Municipal · 3 €</div>
+          </div>
+          <div class="event-card">
+            <div class="event-date">Dom 14 sep · 09:00</div>
+            <div class="event-title">Mercadillo ecológico</div>
+            <div class="event-place">📍 Pza. Constitución</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="card-header">
+            <div class="card-source">
+              <div class="source-icon">💰</div>
+              <div class="source-info">
+                <div class="source-name">BOCM</div>
+                <div class="source-time">Publicado ayer</div>
+              </div>
+            </div>
+            <span class="pill pill-green">Ayuda</span>
+          </div>
+          <div class="card-title">Becas municipales universitarias — hasta 1.200 € para vecinos de Algete</div>
+          <div class="card-desc">Renta familiar máxima de 35.000 €. Solicitud en sede electrónica o en el Ayuntamiento. El plazo cierra el 30 de septiembre.</div>
+          <div class="card-footer">
+            <span>⏰ Cierra el 30 sep</span>
+            <span class="card-cta">Solicitar →</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="card-header">
+            <div class="card-source">
+              <div class="source-icon">📰</div>
+              <div class="source-info">
+                <div class="source-name">SoyDeAlgete</div>
+                <div class="source-time">Hace 1 semana</div>
+              </div>
+            </div>
+            <span class="pill pill-gray">Urbanismo</span>
+          </div>
+          <div class="card-title">Nuevo carril bici de 4,2 km conectará Algete con San Sebastián de los Reyes</div>
+          <div class="card-desc">Las obras comienzan en octubre y durarán aproximadamente 4 meses según el proyecto aprobado en pleno.</div>
+          <div class="card-footer">
+            <span>📅 Hace 1 semana</span>
+            <span class="card-cta">Leer más →</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="card-header">
+            <div class="card-source">
+              <div class="source-icon">🏊</div>
+              <div class="source-info">
+                <div class="source-name">Ayuntamiento de Algete</div>
+                <div class="source-time">Hace 3 días</div>
+              </div>
+            </div>
+            <span class="pill pill-purple">Trámite</span>
+          </div>
+          <div class="card-title">Renueva el abono del polideportivo sin salir de casa — 10% de descuento</div>
+          <div class="card-desc">Ya disponible en la sede electrónica. Descuento para mayores de 65 años y familias numerosas.</div>
+          <div class="card-footer">
+            <span>📅 Hace 3 días</span>
+            <span class="card-cta">Tramitar →</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── AGENDA ── -->
+  <div class="tab-panel" id="tab-agenda">
+    <div class="feed">
+      <div class="sec-divider" style="margin-top:.5rem">Septiembre 2026</div>
+      <div class="card"><div class="card-body">
+        <div class="card-header"><div class="card-source"><div class="source-icon">🎵</div><div class="source-info"><div class="source-name">Concierto Banda Municipal</div><div class="source-time">Sáb 11 sep · 20:00 h</div></div></div><span class="pill pill-blue">Cultura</span></div>
+        <div class="card-desc">Plaza Mayor de Algete · Entrada libre · Programa de zarzuela y música española</div>
+      </div></div>
+      <div class="card"><div class="card-body">
+        <div class="card-header"><div class="card-source"><div class="source-icon">📚</div><div class="source-info"><div class="source-name">Cuentacuentos infantil</div><div class="source-time">Sáb 11 sep · 11:00 h</div></div></div><span class="pill pill-blue">Familia</span></div>
+        <div class="card-desc">Biblioteca Municipal · Para niños de 4 a 8 años · Gratuito</div>
+      </div></div>
+      <div class="card"><div class="card-body">
+        <div class="card-header"><div class="card-source"><div class="source-icon">⚽</div><div class="source-info"><div class="source-name">CD Algete vs Torrejón CF</div><div class="source-time">Dom 12 sep · 18:00 h</div></div></div><span class="pill pill-blue">Deporte</span></div>
+        <div class="card-desc">Campo Municipal de Fútbol · Liga regional · Entrada 3 €</div>
+      </div></div>
+      <div class="card"><div class="card-body">
+        <div class="card-header"><div class="card-source"><div class="source-icon">🌿</div><div class="source-info"><div class="source-name">Mercadillo ecológico</div><div class="source-time">Dom 14 sep · 09:00–14:00 h</div></div></div><span class="pill pill-green">Sostenibilidad</span></div>
+        <div class="card-desc">Plaza de la Constitución · Productores locales de la Sierra Norte</div>
+      </div></div>
+      <div class="card"><div class="card-body">
+        <div class="card-header"><div class="card-source"><div class="source-icon">🏛️</div><div class="source-info"><div class="source-name">Pleno municipal extraordinario</div><div class="source-time">Jue 18 sep · 19:00 h</div></div></div><span class="pill pill-gray">Institucional</span></div>
+        <div class="card-desc">Casa Consistorial · Sesión pública · Acceso libre para vecinos</div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- ── AYUDAS ── -->
+  <div class="tab-panel" id="tab-ayudas">
+    <div class="feed">
+      <div class="sec-divider" style="margin-top:.5rem">Convocatorias abiertas</div>
+      <div class="card"><div class="card-body">
+        <div class="card-header"><div class="card-source"><div class="source-icon">🎓</div><div class="source-info"><div class="source-name">Becas universitarias municipales</div><div class="source-time">Publicado ayer</div></div></div><span class="pill pill-red">Cierra 30 sep</span></div>
+        <div class="card-title">Hasta 1.200 € para estudios universitarios 2024-25</div>
+        <div class="card-desc">Para vecinos empadronados en Algete con renta familiar máxima de 35.000 €. Solicitud en sede electrónica o en el Ayuntamiento.</div>
+        <div class="card-footer"><span>⏰ 21 días restantes</span><span class="card-cta">Solicitar →</span></div>
+      </div></div>
+      <div class="card"><div class="card-body">
+        <div class="card-header"><div class="card-source"><div class="source-icon">☀️</div><div class="source-info"><div class="source-name">Comunidad de Madrid</div><div class="source-time">Hace 5 días</div></div></div><span class="pill pill-gold">Cierra 31 oct</span></div>
+        <div class="card-title">Subvención placas solares — hasta el 40% del coste</div>
+        <div class="card-desc">Para vecinos empadronados en Algete. Instalación en vivienda habitual. Tramitación a través de la Comunidad de Madrid.</div>
+        <div class="card-footer"><span>⏰ 52 días restantes</span><span class="card-cta">Solicitar →</span></div>
+      </div></div>
+      <div class="card"><div class="card-body">
+        <div class="card-header"><div class="card-source"><div class="source-icon">🔥</div><div class="source-info"><div class="source-name">MITECO</div><div class="source-time">Plazo abierto</div></div></div><span class="pill pill-green">Abierta</span></div>
+        <div class="card-title">Bono social térmico para hogares vulnerables</div>
+        <div class="card-desc">Para consumidores con calificación vulnerable. Tramitación a través del comercializador de referencia de energía.</div>
+        <div class="card-footer"><span class="card-cta">Ver requisitos →</span></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- ── TRÁMITES ── -->
+  <div class="tab-panel" id="tab-tramites">
+    <div class="feed">
+      <div class="sec-divider" style="margin-top:.5rem">Gestiones municipales</div>
+      <div class="card"><div class="card-body">
+        <div class="card-header"><div class="card-source"><div class="source-icon">🏠</div><div class="source-info"><div class="source-name">Empadronamiento</div><div class="source-time">Disponible online</div></div></div><span class="pill pill-green">Online · 48h</span></div>
+        <div class="card-desc">Alta y cambio de domicilio. Disponible en sede electrónica con certificado digital o DNIe. Sin desplazamiento.</div>
+        <div class="card-footer"><span class="card-cta">Tramitar online →</span></div>
+      </div></div>
+      <div class="card"><div class="card-body">
+        <div class="card-header"><div class="card-source"><div class="source-icon">🏊</div><div class="source-info"><div class="source-name">Abono polideportivo</div><div class="source-time">Disponible online</div></div></div><span class="pill pill-green">Online</span></div>
+        <div class="card-desc">Renovación sin desplazamiento. Descuento del 10% para mayores de 65 años y familias numerosas.</div>
+        <div class="card-footer"><span class="card-cta">Tramitar online →</span></div>
+      </div></div>
+      <div class="card"><div class="card-body">
+        <div class="card-header"><div class="card-source"><div class="source-icon">🏗️</div><div class="source-info"><div class="source-name">Licencias de obra menor</div><div class="source-time">Presencial</div></div></div><span class="pill pill-purple">Cita previa</span></div>
+        <div class="card-desc">Oficina de Urbanismo: martes y jueves de 9:00 a 13:00 h. Solicitar cita previa a través de la web municipal.</div>
+        <div class="card-footer"><span class="card-cta">Pedir cita →</span></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- ── NOTICIAS ── -->
+  <div class="tab-panel" id="tab-noticias">
+    <div class="feed">
+      <div class="sec-divider" style="margin-top:.5rem">Últimas noticias</div>
+      <div class="card"><div class="card-body">
+        <div class="card-header"><div class="card-source"><div class="source-icon">🏛️</div><div class="source-info"><div class="source-name">Ayuntamiento de Algete</div><div class="source-time">Hoy</div></div></div><span class="pill pill-blue">Municipio</span></div>
+        <div class="card-title">El Ayuntamiento aprueba la renovación de 6 parques infantiles por 280.000 €</div>
+        <div class="card-footer"><span>📅 Hoy</span><span class="card-cta">Leer →</span></div>
+      </div></div>
+      <div class="card"><div class="card-body">
+        <div class="card-header"><div class="card-source"><div class="source-icon">📰</div><div class="source-info"><div class="source-name">SoyDeAlgete</div><div class="source-time">Hace 1 semana</div></div></div><span class="pill pill-gray">Urbanismo</span></div>
+        <div class="card-title">Nuevo carril bici de 4,2 km conectará Algete con San Sebastián de los Reyes en 2027</div>
+        <div class="card-footer"><span>📅 Hace 1 semana</span><span class="card-cta">Leer →</span></div>
+      </div></div>
+      <div class="card"><div class="card-body">
+        <div class="card-header"><div class="card-source"><div class="source-icon">🚔</div><div class="source-info"><div class="source-name">Ayuntamiento de Algete</div><div class="source-time">Hace 4 días</div></div></div><span class="pill pill-gray">Seguridad</span></div>
+        <div class="card-title">La Policía Local refuerza los controles de velocidad en la N-I a su paso por Algete</div>
+        <div class="card-footer"><span>📅 Hace 4 días</span><span class="card-cta">Leer →</span></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- ── PERFIL ── -->
+  <div class="tab-panel" id="tab-perfil">
+    <div class="feed">
+      <div class="profile-header">
+        <div class="profile-avatar-lg">RG</div>
+        <h2>Rubén García</h2>
+        <p>📍 Algete · Miembro desde sep 2026</p>
+      </div>
+      <div class="settings-card">
+        <div class="settings-title">Mis secciones</div>
+        <div class="settings-row"><span>🎭 Cultura y ocio</span><div class="toggle"></div></div>
+        <div class="settings-row"><span>👨‍👩‍👧 Familia y educación</span><div class="toggle"></div></div>
+        <div class="settings-row"><span>📰 Noticias locales</span><div class="toggle"></div></div>
+        <div class="settings-row"><span>💰 Ayudas y subvenciones</span><div class="toggle off"></div></div>
+        <div class="settings-row"><span>🏋️ Deporte</span><div class="toggle off"></div></div>
+      </div>
+      <div class="settings-card">
+        <div class="settings-title">Notificaciones</div>
+        <div class="settings-row"><span>Resumen matutino diario</span><div class="toggle"></div></div>
+        <div class="settings-row"><span>Alertas urgentes</span><div class="toggle"></div></div>
+        <div class="settings-row"><span>Nuevas ayudas</span><div class="toggle off"></div></div>
+      </div>
+      <div class="settings-card">
+        <div class="settings-row" style="cursor:pointer">Mi municipio: Algete <span style="color:var(--text-secondary)">›</span></div>
+        <div class="settings-row" style="cursor:pointer;color:var(--red)">Cerrar sesión</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="bnav active" id="bn-portada" onclick="showTab('portada')">
+      <span class="bnav-icon">🏠</span><div class="bnav-dot"></div><span class="bnav-label">Inicio</span>
+    </button>
+    <button class="bnav" id="bn-agenda" onclick="showTab('agenda')">
+      <span class="bnav-icon">📅</span><div class="bnav-dot"></div><span class="bnav-label">Agenda</span>
+    </button>
+    <button class="bnav" id="bn-ask" onclick="openModal()">
+      <span class="bnav-icon">💬</span><div class="bnav-dot"></div><span class="bnav-label">Preguntar</span>
+    </button>
+    <button class="bnav" id="bn-ayudas" onclick="showTab('ayudas')">
+      <span class="bnav-icon">💰</span><div class="bnav-dot"></div><span class="bnav-label">Ayudas</span>
+    </button>
+    <button class="bnav" id="bn-perfil" onclick="showTab('perfil')">
+      <span class="bnav-icon">👤</span><div class="bnav-dot"></div><span class="bnav-label">Perfil</span>
+    </button>
+  </nav>
+</div>
+
+<!-- MODAL IA -->
+<div class="modal-bg" id="modal" onclick="closeOuter(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">💬 Pregunta sobre Algete</div>
+    <div class="ai-response-box">
+      <div class="ai-from">InfoLocal · IA</div>
+      Este fin de semana hay <strong>4 planes en Algete</strong>: concierto de la Banda Municipal el sábado en la Plaza Mayor a las 20:00 h (gratis), cuentacuentos infantil en la Biblioteca a las 11:00 h, exposición de pintura en la Casa de Cultura y el partido del CD Algete el domingo a las 18:00 h. ¿Te interesa alguno?
+    </div>
+    <div class="quick-qs">
+      <div class="quick-qs-label">Preguntas frecuentes</div>
+      <button class="qq-btn" onclick="fillQ(this)">¿Qué ayudas puedo pedir este mes?</button>
+      <button class="qq-btn" onclick="fillQ(this)">¿Hay obras que afecten a mi zona?</button>
+      <button class="qq-btn" onclick="fillQ(this)">¿Cómo tramito el empadronamiento?</button>
+      <button class="qq-btn" onclick="fillQ(this)">Planes para niños este fin de semana</button>
+      <button class="qq-btn" onclick="fillQ(this)">¿Cuándo es el próximo pleno?</button>
+    </div>
+    <div class="modal-input">
+      <input type="text" placeholder="Escribe tu pregunta…" id="minput">
+      <button onclick="sendQ()">Enviar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let obCurrent = 1;
+
+function goTo(s) {
+  document.querySelectorAll('.screen').forEach(x => x.classList.remove('active'));
+  document.getElementById('screen-' + s).classList.add('active');
+  window.scrollTo(0,0);
+}
+function obGo(n) {
+  document.getElementById('op' + obCurrent).classList.remove('active');
+  document.getElementById('d' + obCurrent).classList.add('done');
+  obCurrent = n;
+  document.getElementById('op' + n).classList.add('active');
+  document.getElementById('d' + n).classList.add('done');
+}
+function showTab(t) {
+  document.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.bnav').forEach(x => x.classList.remove('active'));
+  const p = document.getElementById('tab-' + t);
+  if (p) p.classList.add('active');
+  const b = document.getElementById('bn-' + t);
+  if (b) b.classList.add('active');
+  document.querySelectorAll('.fnav').forEach(x => x.classList.remove('active'));
+  window.scrollTo(0,0);
+}
+function switchTab(el, t) {
+  document.querySelectorAll('.fnav').forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.bnav').forEach(x => x.classList.remove('active'));
+  const p = document.getElementById('tab-' + t);
+  if (p) p.classList.add('active');
+  const b = document.getElementById('bn-' + t);
+  if (b) b.classList.add('active');
+  window.scrollTo(0,0);
+}
+function openModal() { document.getElementById('modal').classList.add('open'); }
+function closeOuter(e) { if (e.target === document.getElementById('modal')) document.getElementById('modal').classList.remove('open'); }
+function fillQ(el) { document.getElementById('minput').value = el.textContent; }
+function sendQ() {
+  const v = document.getElementById('minput').value.trim();
+  if (!v) return;
+  document.querySelector('.ai-response-box').innerHTML = `<div class="ai-from">InfoLocal · IA</div>Buscando información actualizada sobre <strong>"${v}"</strong> en Algete… He encontrado <strong>2 resultados relevantes</strong>. ¿Quieres que te los detalle?`;
+  document.getElementById('minput').value = '';
+}
+</script>
+</body>
+</html>
