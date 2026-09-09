@@ -411,6 +411,37 @@ body {
   -webkit-box-orient: vertical; overflow: hidden;
 }
 
+/* BANNER PUBLICITARIO EN FEED */
+.ad-feed {
+  border: 1px dashed rgba(255,255,255,0.15);
+  border-radius: 4px;
+  background: rgba(255,255,255,0.02);
+  padding: 1.25rem 1rem;
+  margin-bottom: 0.65rem;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; min-height: 100px;
+  cursor: pointer; transition: background .2s;
+  position: relative;
+}
+.ad-feed:hover { background: rgba(255,255,255,0.04); }
+.ad-feed-label {
+  font-size: 0.58rem; font-weight: 700;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 0.1em;
+  position: absolute; top: 0.5rem; right: 0.6rem;
+}
+.ad-feed-icon { font-size: 1.5rem; margin-bottom: 0.4rem; opacity: 0.3; }
+.ad-feed-text {
+  font-size: 0.72rem; color: rgba(255,255,255,0.25);
+  line-height: 1.4;
+}
+.ad-feed-cta {
+  margin-top: 0.5rem;
+  font-size: 0.65rem; font-weight: 600;
+  color: var(--red); opacity: 0.6;
+}
+
 /* SECCIÓN HEADER */
 .sec-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -882,9 +913,30 @@ function renderCard(item, size = 'normal') {
   }
 }
 
+function adBanner() {
+  const ads = [
+    { icon: '🍕', text: 'Tu negocio local aquí', sub: 'Llega a todos los vecinos de Algete' },
+    { icon: '🏠', text: 'Anúnciate en InfoLocal', sub: 'La app de referencia en Algete' },
+    { icon: '💈', text: 'Publicidad local', sub: 'Contacta con nosotros' },
+  ];
+  const ad = ads[Math.floor(Math.random() * ads.length)];
+  return `
+    <div class="ad-feed">
+      <span class="ad-feed-label">PUBLICIDAD</span>
+      <div class="ad-feed-icon">${ad.icon}</div>
+      <div class="ad-feed-text">${ad.text}</div>
+      <div class="ad-feed-text" style="opacity:.6">${ad.sub}</div>
+      <div class="ad-feed-cta">¿Quieres anunciarte? →</div>
+    </div>`;
+}
+
 function renderFeed(items) {
   if (!items.length) return '<div class="empty"><span class="empty-icon">📭</span>Sin novedades por ahora</div>';
-  return items.map((item, i) => renderCard(item, i === 0 ? 'hero' : 'normal')).join('');
+  return items.map((item, i) => {
+    const card = renderCard(item, i === 0 ? 'hero' : 'normal');
+    // Insertar banner después de la 5ª, 10ª, 15ª... card
+    return (i > 0 && i % 5 === 0) ? adBanner() + card : card;
+  }).join('');
 }
 
 // ── CARGAR DATOS ─────────────────────────────────────────────
