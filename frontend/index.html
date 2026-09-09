@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>InfoLocal — Algete</title>
+<title>LocalInfo — Algete</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -655,7 +655,7 @@ body {
       <h2>Todo listo</h2>
       <p>Tu portada de Algete está preparada con noticias actualizadas cada día.</p>
       <br><br>
-      <button class="btn-red" onclick="initApp()">Abrir InfoLocal</button>
+      <button class="btn-red" onclick="initApp()">Abrir LocalInfo</button>
     </div>
   </div>
 </div>
@@ -749,7 +749,7 @@ body {
     <div class="perfil-header">
       <div class="perfil-avatar">RG</div>
       <h2>Vecino de Algete</h2>
-      <p>📍 Algete · InfoLocal</p>
+      <p>📍 Algete · LocalInfo</p>
     </div>
     <div class="settings-block">
       <div class="settings-label">Mis secciones</div>
@@ -765,7 +765,7 @@ body {
       <div class="settings-row"><span>Alertas urgentes</span><div class="toggle"></div></div>
     </div>
     <div class="settings-block" style="margin-top:.65rem">
-      <div class="settings-row" style="cursor:pointer;color:var(--muted)">InfoLocal v1.0 · Algete</div>
+      <div class="settings-row" style="cursor:pointer;color:var(--muted)">LocalInfo v1.0 · Algete</div>
     </div>
     <div id="stats-container" style="padding:.75rem 1rem;font-size:0.72rem;color:var(--muted);text-align:center"></div>
   </div>
@@ -924,7 +924,7 @@ function pillLabel(cat, sub) {
 function renderCard(item, size = 'normal') {
   const hasImg = item.url_imagen && !item.url_imagen.startsWith('data:') && !item.url_imagen.includes('lazy');
   const pill = `<div class="flip-pill ${pillClass(item.categoria, item.subcategoria)}">${pillLabel(item.categoria, item.subcategoria)}</div>`;
-  const meta = `<div class="flip-meta"><span class="source">${item.fuente_nombre||'InfoLocal'}</span> · <span>${fechaRel(item.fecha_publicacion)}</span></div>`;
+  const meta = `<div class="flip-meta"><span class="source">${item.fuente_nombre||'LocalInfo'}</span> · <span>${fechaRel(item.fecha_publicacion)}</span></div>`;
   const url = item.url_original || '#';
 
   if (hasImg) {
@@ -955,7 +955,7 @@ function renderCard(item, size = 'normal') {
 function adBanner() {
   const ads = [
     { icon: '🍕', text: 'Tu negocio local aquí', sub: 'Llega a todos los vecinos de Algete' },
-    { icon: '🏠', text: 'Anúnciate en InfoLocal', sub: 'La app de referencia en Algete' },
+    { icon: '🏠', text: 'Anúnciate en LocalInfo', sub: 'La app de referencia en Algete' },
     { icon: '💈', text: 'Publicidad local', sub: 'Contacta con nosotros' },
   ];
   const ad = ads[Math.floor(Math.random() * ads.length)];
