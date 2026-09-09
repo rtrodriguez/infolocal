@@ -304,3 +304,8 @@ RESPUESTA:"""
 @app.get("/health")
 def health():
     return {"status": "ok", "version": "1.0", "app": "InfoLocal"}
+
+@app.get("/ping")
+def ping():
+    """Keep-alive endpoint — llamado cada 10 min desde el frontend"""
+    return {"pong": True}

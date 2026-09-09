@@ -1050,20 +1050,33 @@ async function buscarIA() {
 
   const respEl = document.getElementById('ai-resp');
   const fuentesEl = document.getElementById('ai-fuentes');
-  respEl.textContent = '…';
   fuentesEl.innerHTML = '';
 
+  // Mensajes de espera progresivos
+  respEl.textContent = 'Buscando en Algete…';
+  const msgs = ['Consultando noticias…', 'Analizando resultados…', 'Casi listo…'];
+  let mi = 0;
+  const timer = setInterval(() => {
+    if (mi < msgs.length) respEl.textContent = msgs[mi++];
+  }, 4000);
+
   try {
+    // AbortController para 45 segundos de timeout
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 45000);
+
     const r = await fetch(`${API}/chat/${MID}`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({pregunta: q, municipio_id: MID})
+      body: JSON.stringify({pregunta: q, municipio_id: MID}),
+      signal: controller.signal
     });
-    const data = await r.json();
+    clearTimeout(timeout);
+    clearInterval(timer);
 
+    const data = await r.json();
     respEl.textContent = data.respuesta || 'No tengo información sobre eso ahora mismo.';
 
-    // Mostrar fuentes
     if (data.fuentes?.length) {
       fuentesEl.innerHTML = '<div class="ai-fuentes-label">FUENTES</div>' +
         data.fuentes.map(f =>
@@ -1074,7 +1087,30 @@ async function buscarIA() {
         ).join('');
     }
   } catch(e) {
-    respEl.textContent = 'Error al conectar. Inténtalo de nuevo.';
+    clearInterval(timer);
+    if (e.name === 'AbortError') {
+      // Timeout — hacer fallback a búsqueda simple
+      try {
+        const r2 = await fetch(`${API}/buscar/${MID}?q=${encodeURIComponent(q)}&limite=3`);
+        const d2 = await r2.json();
+        if (d2.items?.length) {
+          respEl.textContent = `He encontrado ${d2.total} resultado(s) sobre "${q}" en Algete.`;
+          fuentesEl.innerHTML = '<div class="ai-fuentes-label">RESULTADOS</div>' +
+            d2.items.map(f =>
+              `<a href="${f.url_original||'#'}" target="_blank" class="ai-fuente-item">
+                <span class="ai-fuente-cat">${f.categoria||''}</span>
+                ${f.titulo}
+              </a>`
+            ).join('');
+        } else {
+          respEl.textContent = `No encontré nada sobre "${q}" en Algete.`;
+        }
+      } catch(e2) {
+        respEl.textContent = 'El asistente está arrancando, inténtalo en unos segundos.';
+      }
+    } else {
+      respEl.textContent = 'Error al conectar. Inténtalo de nuevo.';
+    }
   }
   document.getElementById('minput').value = '';
 }
@@ -1109,6 +1145,9 @@ function initApp() {
 
 // Arrancar directamente sin login
 initApp();
+
+// Keep-alive — evita que Render se duerma
+setInterval(() => fetch(`${API}/ping`).catch(()=>{}), 10 * 60 * 1000);
 </script>
 </body>
 </html>
