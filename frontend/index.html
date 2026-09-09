@@ -153,6 +153,100 @@ body {
 .int-row.sel .int-check { background: var(--red); border-color: var(--red); color: white; }
 .int-row.sel .int-name { color: white; }
 
+/* ══ LAYOUT ESCRITORIO ══════════════════════════════════════ */
+@media (min-width: 768px) {
+  #screen-app {
+    display: grid;
+    grid-template-columns: 160px 1fr 160px;
+    grid-template-rows: auto auto auto 1fr;
+    min-height: 100vh;
+  }
+  .topbar {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+  .loc-bar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .section-nav {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+  .tab-panel {
+    grid-column: 2;
+    grid-row: 4;
+  }
+  .tab-panel.active { display: block; }
+  .bottom-nav { display: none; }
+  .sidebar-left {
+    grid-column: 1;
+    grid-row: 4;
+    padding: 0.75rem 0.5rem 0.75rem 0.75rem;
+    display: flex; flex-direction: column; gap: 0.65rem;
+  }
+  .sidebar-right {
+    grid-column: 3;
+    grid-row: 4;
+    padding: 0.75rem 0.75rem 0.75rem 0.5rem;
+    display: flex; flex-direction: column; gap: 0.65rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .sidebar-left, .sidebar-right { display: none; }
+}
+
+/* AD PLACEHOLDER */
+.ad-slot {
+  border: 1px dashed rgba(255,255,255,0.12);
+  border-radius: 4px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 1rem 0.5rem; text-align: center;
+  background: rgba(255,255,255,0.02);
+  cursor: pointer; transition: background .2s;
+}
+.ad-slot:hover { background: rgba(255,255,255,0.04); }
+.ad-slot-icon { font-size: 1.3rem; margin-bottom: 0.4rem; opacity: 0.4; }
+.ad-slot-label {
+  font-size: 0.62rem; font-weight: 600;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+}
+.ad-slot-size {
+  font-size: 0.58rem;
+  color: rgba(255,255,255,0.15);
+  margin-top: 0.2rem;
+}
+.ad-slot.tall { min-height: 280px; }
+.ad-slot.medium { min-height: 160px; }
+
+/* WIDGET */
+.widget {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  padding: 0.85rem 0.75rem;
+}
+.widget-title {
+  font-size: 0.62rem; font-weight: 700;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.08em;
+  margin-bottom: 0.65rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.widget-item {
+  font-size: 0.72rem; color: var(--muted);
+  padding: 0.3rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  line-height: 1.4;
+}
+.widget-item:last-child { border-bottom: none; }
+.widget-item strong { color: rgba(255,255,255,0.7); display: block; font-size: 0.68rem; }
+
 /* ══ APP ══════════════════════════════════════════════════════ */
 #screen-app { background: var(--ink); padding-bottom: 64px; }
 
@@ -606,6 +700,49 @@ body {
     </div>
     <div id="stats-container" style="padding:.75rem 1rem;font-size:0.72rem;color:var(--muted);text-align:center"></div>
   </div>
+
+  <!-- SIDEBAR IZQUIERDO -->
+  <aside class="sidebar-left">
+    <div class="ad-slot tall">
+      <div class="ad-slot-icon">📢</div>
+      <div class="ad-slot-label">Espacio publicitario</div>
+      <div class="ad-slot-size">160 × 280</div>
+    </div>
+    <div class="widget">
+      <div class="widget-title">ALGETE HOY</div>
+      <div class="widget-item"><strong id="sw-temp">🌤️ —</strong>Temperatura</div>
+      <div class="widget-item"><strong>28.014</strong>Cód. INE</div>
+      <div class="widget-item"><strong>Madrid</strong>Provincia</div>
+    </div>
+    <div class="ad-slot medium">
+      <div class="ad-slot-icon">📢</div>
+      <div class="ad-slot-label">Espacio publicitario</div>
+      <div class="ad-slot-size">160 × 160</div>
+    </div>
+  </aside>
+
+  <!-- SIDEBAR DERECHO -->
+  <aside class="sidebar-right">
+    <div class="ad-slot tall">
+      <div class="ad-slot-icon">📢</div>
+      <div class="ad-slot-label">Espacio publicitario</div>
+      <div class="ad-slot-size">160 × 280</div>
+    </div>
+    <div class="widget">
+      <div class="widget-title">FUENTES</div>
+      <div class="widget-item">🏛️ Ayuntamiento</div>
+      <div class="widget-item">📰 SoyDeAlgete</div>
+      <div class="widget-item">📡 Madrid Norte 24h</div>
+      <div class="widget-item">🗞️ Madrid 24 Horas</div>
+      <div class="widget-item">📋 Madrid Es Noticia</div>
+      <div class="widget-item">📝 El Diario Madrid</div>
+    </div>
+    <div class="ad-slot medium">
+      <div class="ad-slot-icon">📢</div>
+      <div class="ad-slot-label">Espacio publicitario</div>
+      <div class="ad-slot-size">160 × 160</div>
+    </div>
+  </aside>
 
   <nav class="bottom-nav">
     <button class="bnav active" id="bn-portada" onclick="showTab('portada')">
