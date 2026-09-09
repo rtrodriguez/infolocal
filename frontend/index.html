@@ -30,6 +30,27 @@ body {
 .screen { display: none; min-height: 100vh; }
 .screen.active { display: block; }
 
+/* FUENTES DEL ASISTENTE */
+.ai-fuentes-label {
+  font-size: 0.6rem; font-weight: 700;
+  color: rgba(255,255,255,0.25); letter-spacing: 0.1em;
+  margin: 0.75rem 0 0.4rem;
+}
+.ai-fuente-item {
+  display: block; padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.78rem; color: rgba(255,255,255,0.7);
+  text-decoration: none; line-height: 1.4;
+  transition: color .15s;
+}
+.ai-fuente-item:hover { color: var(--white); }
+.ai-fuente-item:last-child { border-bottom: none; }
+.ai-fuente-cat {
+  display: inline-block; font-size: 0.6rem;
+  font-weight: 700; color: var(--red);
+  margin-right: 0.35rem; text-transform: uppercase;
+}
+
 /* ══ LOGIN ══════════════════════════════════════════════════ */
 #screen-login {
   display: none; min-height: 100vh;
@@ -825,9 +846,10 @@ body {
     <button class="qq-btn" onclick="fillQ(this)">Eventos este fin de semana</button>
     <button class="qq-btn" onclick="fillQ(this)">Trámite de empadronamiento</button>
     <button class="qq-btn" onclick="fillQ(this)">Pleno municipal</button>
-    <div class="modal-inp">
-      <input type="text" placeholder="Escribe tu búsqueda…" id="minput">
-      <button onclick="buscarIA()">Buscar</button>
+    <div id="ai-fuentes"></div>
+    <div class="modal-inp" style="margin-top:.75rem">
+      <input type="text" placeholder="Pregunta sobre Algete…" id="minput" onkeydown="if(event.key==='Enter')buscarIA()">
+      <button onclick="buscarIA()">Preguntar</button>
     </div>
   </div>
 </div>
@@ -1025,18 +1047,34 @@ async function cargarStats() {
 async function buscarIA() {
   const q = document.getElementById('minput').value.trim();
   if (!q) return;
-  document.getElementById('ai-resp').textContent = 'Buscando…';
+
+  const respEl = document.getElementById('ai-resp');
+  const fuentesEl = document.getElementById('ai-fuentes');
+  respEl.textContent = '…';
+  fuentesEl.innerHTML = '';
+
   try {
-    const r = await fetch(`${API}/buscar/${MID}?q=${encodeURIComponent(q)}&limite=5`);
+    const r = await fetch(`${API}/chat/${MID}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({pregunta: q, municipio_id: MID})
+    });
     const data = await r.json();
-    if (data.items?.length) {
-      document.getElementById('ai-resp').textContent =
-        `${data.total} resultado(s) para "${q}":\n\n` + data.items.map(i => `• ${i.titulo}`).join('\n');
-    } else {
-      document.getElementById('ai-resp').textContent = `Sin resultados para "${q}" en Algete.`;
+
+    respEl.textContent = data.respuesta || 'No tengo información sobre eso ahora mismo.';
+
+    // Mostrar fuentes
+    if (data.fuentes?.length) {
+      fuentesEl.innerHTML = '<div class="ai-fuentes-label">FUENTES</div>' +
+        data.fuentes.map(f =>
+          `<a href="${f.url_original||'#'}" target="_blank" class="ai-fuente-item">
+            <span class="ai-fuente-cat">${f.categoria||''}</span>
+            ${f.titulo}
+          </a>`
+        ).join('');
     }
   } catch(e) {
-    document.getElementById('ai-resp').textContent = 'Error al buscar.';
+    respEl.textContent = 'Error al conectar. Inténtalo de nuevo.';
   }
   document.getElementById('minput').value = '';
 }

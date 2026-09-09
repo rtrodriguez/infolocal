@@ -230,6 +230,75 @@ def stats(municipio_id: str):
 
 
 # ════════════════════════════════════════════════════════════
+#  ASISTENTE IA
+# ════════════════════════════════════════════════════════════
+import urllib.request
+import json as json_lib
+
+class PreguntaIA(BaseModel):
+    pregunta: str
+    municipio_id: str
+
+@app.post("/chat/{municipio_id}")
+def chat(municipio_id: str, body: PreguntaIA):
+    """Asistente IA que responde sobre el municipio usando datos reales."""
+    pregunta = body.pregunta.strip()
+    if not pregunta:
+        raise HTTPException(400, "Pregunta vacía")
+
+    # 1. Buscar contenidos relevantes en Supabase
+    resultados = sb.table("contenidos")        .select("titulo, resumen, categoria, subcategoria, fecha_publicacion, url_original")        .eq("municipio_id", municipio_id)        .eq("activo", True)        .ilike("titulo", f"%{pregunta.split()[0]}%")        .order("fecha_publicacion", desc=True)        .limit(5)        .execute().data
+
+    # Si no hay resultados con la primera palabra, buscar más amplio
+    if not resultados:
+        resultados = sb.table("contenidos")            .select("titulo, resumen, categoria, subcategoria, fecha_publicacion, url_original")            .eq("municipio_id", municipio_id)            .eq("activo", True)            .order("fecha_publicacion", desc=True)            .limit(8)            .execute().data
+
+    # 2. Construir contexto para la IA
+    contexto = "\n".join([
+        f"- [{r['categoria'].upper()}] {r['titulo']}: {r['resumen'] or ''} (Fecha: {str(r['fecha_publicacion'])[:10]})"
+        for r in resultados
+    ])
+
+    prompt = f"""Eres el asistente de InfoLocal, una app de noticias locales para vecinos de Algete (Madrid).
+Responde de forma breve, amigable y útil en español. Máximo 3 frases.
+Si la información está en el contexto, úsala. Si no, di que no tienes esa información disponible ahora mismo.
+
+PREGUNTA DEL VECINO: {pregunta}
+
+CONTENIDOS RECIENTES DE ALGETE:
+{contexto}
+
+RESPUESTA:"""
+
+    # 3. Llamar a Gemini
+    gemini_key = os.getenv("GEMINI_KEY", "")
+    if not gemini_key:
+        # Fallback sin IA — respuesta basada solo en búsqueda
+        if resultados:
+            resp = f"He encontrado {len(resultados)} resultado(s) relacionado(s): {resultados[0]['titulo']}."
+        else:
+            resp = "No tengo información sobre eso en Algete en este momento."
+        return {"respuesta": resp, "fuentes": resultados[:3]}
+
+    try:
+        gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={gemini_key}"
+        data = json_lib.dumps({
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {"temperature": 0.3, "maxOutputTokens": 200}
+        }).encode()
+        req = urllib.request.Request(gemini_url, data=data, headers={"Content-Type": "application/json"})
+        res = urllib.request.urlopen(req, timeout=20)
+        respuesta = json_lib.loads(res.read())["candidates"][0]["content"]["parts"][0]["text"].strip()
+    except Exception as e:
+        respuesta = f"He encontrado {len(resultados)} resultado(s) sobre tu pregunta en Algete." if resultados else "No tengo información sobre eso ahora mismo."
+
+    return {
+        "respuesta": respuesta,
+        "fuentes": resultados[:3]
+    }
+
+
+# ════════════════════════════════════════════════════════════
 #  HEALTH CHECK
 # ════════════════════════════════════════════════════════════
 @app.get("/health")
