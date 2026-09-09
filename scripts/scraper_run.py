@@ -81,6 +81,17 @@ def get_fuente_id(nombre):
     res = sb.table("fuentes").select("id").eq("nombre", nombre).execute()
     return res.data[0]["id"] if res.data else None
 
+def fecha_desde_url(url):
+    """Extrae fecha del slug tipo /20240729130317.html — más fiable que el HTML"""
+    import re
+    m = re.search(r'/(\d{4})(\d{2})(\d{2})\d+\.html', url)
+    if m:
+        try:
+            return datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)), tzinfo=timezone.utc)
+        except:
+            pass
+    return None
+
 def guardar(titulo, resumen, url, fuente_id, subcategoria, img_url=None, fecha=None):
     h = hash_c(titulo, url)
     if ya_existe(h):
@@ -229,6 +240,10 @@ async def scrape_rss(client, nombre, rss_url, filtro="algete"):
                 except:
                     pass
             sub = clasificar(titulo + " " + resumen)
+            # Priorizar fecha del slug de URL (más fiable que el HTML)
+            fecha_slug = fecha_desde_url(link)
+            if fecha_slug:
+                fecha = fecha_slug
             if guardar(titulo, resumen, link, fid, sub, img, fecha):
                 nuevos += 1
     except Exception as e:
@@ -266,6 +281,10 @@ async def scrape_web(client, nombre, url):
                 except:
                     pass
             sub = clasificar(titulo + " " + resumen)
+            # Priorizar fecha del slug de URL (más fiable que el HTML)
+            fecha_slug = fecha_desde_url(link)
+            if fecha_slug:
+                fecha = fecha_slug
             if guardar(titulo, resumen, link, fid, sub, img, fecha):
                 nuevos += 1
     except Exception as e:
