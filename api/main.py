@@ -243,58 +243,63 @@ def chat(municipio_id: str, body: PreguntaIA):
     """Asistente IA que responde sobre el municipio usando datos reales."""
     pregunta = body.pregunta.strip()
     if not pregunta:
-        raise HTTPException(400, "Pregunta vacía")
+        raise HTTPException(400, "Pregunta vacia")
 
-    # 1. Buscar contenidos relevantes en Supabase
-    resultados = sb.table("contenidos")        .select("titulo, resumen, categoria, subcategoria, fecha_publicacion, url_original")        .eq("municipio_id", municipio_id)        .eq("activo", True)        .ilike("titulo", f"%{pregunta.split()[0]}%")        .order("fecha_publicacion", desc=True)        .limit(5)        .execute().data
+    # 1. Buscar por primera palabra del query
+    palabra = pregunta.split()[0]
+    res1 = sb.table("contenidos").select(
+        "titulo, resumen, categoria, subcategoria, fecha_publicacion, url_original"
+    ).eq("municipio_id", municipio_id).eq("activo", True).ilike(
+        "titulo", f"%{palabra}%"
+    ).order("fecha_publicacion", desc=True).limit(5).execute()
+    resultados = res1.data
 
-    # Si no hay resultados con la primera palabra, buscar más amplio
+    # 2. Si no hay resultados, coger los mas recientes
     if not resultados:
-        resultados = sb.table("contenidos")            .select("titulo, resumen, categoria, subcategoria, fecha_publicacion, url_original")            .eq("municipio_id", municipio_id)            .eq("activo", True)            .order("fecha_publicacion", desc=True)            .limit(8)            .execute().data
+        res2 = sb.table("contenidos").select(
+            "titulo, resumen, categoria, subcategoria, fecha_publicacion, url_original"
+        ).eq("municipio_id", municipio_id).eq("activo", True).order(
+            "fecha_publicacion", desc=True
+        ).limit(8).execute()
+        resultados = res2.data
 
-    # 2. Construir contexto para la IA
-    contexto = "\n".join([
-        f"- [{r['categoria'].upper()}] {r['titulo']}: {r['resumen'] or ''} (Fecha: {str(r['fecha_publicacion'])[:10]})"
-        for r in resultados
-    ])
+    # 3. Construir contexto
+    lineas = []
+    for r in resultados:
+        fecha = str(r.get("fecha_publicacion", ""))[:10]
+        lineas.append(f"- [{r['categoria'].upper()}] {r['titulo']}: {r.get('resumen','')[:100]} ({fecha})")
+    contexto = "\n".join(lineas)
 
-    prompt = f"""Eres el asistente de InfoLocal, una app de noticias locales para vecinos de Algete (Madrid).
-Responde de forma breve, amigable y útil en español. Máximo 3 frases.
-Si la información está en el contexto, úsala. Si no, di que no tienes esa información disponible ahora mismo.
+    prompt = (
+        "Eres el asistente de LocalInfo, app de noticias para vecinos de Algete (Madrid). "
+        "Responde en espanol, breve y util, maximo 3 frases. "
+        "Usa el contexto si es relevante.\n\n"
+        f"PREGUNTA: {pregunta}\n\n"
+        f"CONTEXTO:\n{contexto}\n\nRESPUESTA:"
+    )
 
-PREGUNTA DEL VECINO: {pregunta}
-
-CONTENIDOS RECIENTES DE ALGETE:
-{contexto}
-
-RESPUESTA:"""
-
-    # 3. Llamar a Gemini
+    # 4. Llamar a Gemini
     gemini_key = os.getenv("GEMINI_KEY", "")
     if not gemini_key:
-        # Fallback sin IA — respuesta basada solo en búsqueda
-        if resultados:
-            resp = f"He encontrado {len(resultados)} resultado(s) relacionado(s): {resultados[0]['titulo']}."
-        else:
-            resp = "No tengo información sobre eso en Algete en este momento."
-        return {"respuesta": resp, "fuentes": resultados[:3]}
+        respuesta = f"Encontre {len(resultados)} resultado(s) para tu consulta en Algete." if resultados else "No tengo informacion sobre eso ahora mismo."
+        return {"respuesta": respuesta, "fuentes": resultados[:3]}
 
     try:
         gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={gemini_key}"
-        data = json_lib.dumps({
+        payload = json_lib.dumps({
             "contents": [{"parts": [{"text": prompt}]}],
             "generationConfig": {"temperature": 0.3, "maxOutputTokens": 200}
         }).encode()
-        req = urllib.request.Request(gemini_url, data=data, headers={"Content-Type": "application/json"})
-        res = urllib.request.urlopen(req, timeout=20)
-        respuesta = json_lib.loads(res.read())["candidates"][0]["content"]["parts"][0]["text"].strip()
-    except Exception as e:
-        respuesta = f"He encontrado {len(resultados)} resultado(s) sobre tu pregunta en Algete." if resultados else "No tengo información sobre eso ahora mismo."
+        req = urllib.request.Request(
+            gemini_url, data=payload,
+            headers={"Content-Type": "application/json"}
+        )
+        res3 = urllib.request.urlopen(req, timeout=20)
+        respuesta = json_lib.loads(res3.read())["candidates"][0]["content"]["parts"][0]["text"].strip()
+    except Exception:
+        respuesta = f"Encontre {len(resultados)} resultado(s) sobre tu pregunta." if resultados else "No tengo informacion sobre eso ahora mismo."
 
-    return {
-        "respuesta": respuesta,
-        "fuentes": resultados[:3]
-    }
+    return {"respuesta": respuesta, "fuentes": resultados[:3]}
 
 
 # ════════════════════════════════════════════════════════════
